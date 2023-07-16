@@ -12,7 +12,6 @@ export async function PATCH(
       return new NextResponse("Unauthenticated", { status: 401 });
     }
     const { name } = await req.json();
-    console.log(name);
     
     if (!name) {
       return new NextResponse("A store name is required", { status: 400 });
