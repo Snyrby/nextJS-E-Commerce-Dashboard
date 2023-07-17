@@ -59,7 +59,7 @@ export async function GET(
     const billboards = await prismadb.billboard.findMany({
       where: { storeId: params.storeId },
     });
-    return NextResponse.json(billboards, { status: 201 });
+    return NextResponse.json(billboards, { status: 200 });
   } catch (error) {
     console.log("[BILLBOARDS_GET]", error);
     return new NextResponse("Internal error", { status: 500 });

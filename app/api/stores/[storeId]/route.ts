@@ -23,7 +23,7 @@ export async function PATCH(
       where: { id: params.storeId, userId },
       data: { name },
     });
-    return NextResponse.json(store);
+    return NextResponse.json(store, { status: 200 });
   } catch (error) {
     console.log("[STORE_PATCH]", error);
     return new NextResponse("Internal error", { status: 500 });
@@ -45,7 +45,7 @@ export async function DELETE(
     const store = await prismadb.store.deleteMany({
       where: { id: params.storeId, userId }
     });
-    return NextResponse.json(store);
+    return NextResponse.json(store, { status: 200 });
   } catch (error) {
     console.log("[STORE_DELETE]", error);
     return new NextResponse("Internal error", { status: 500 });
