@@ -46,6 +46,7 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
   const origin = useOrigin();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [imageId, setImageId] = useState({});
   const [submitButtonClicked, setSubmitButtonClicked] = useState(false);
   const [emptyValidation, setEmptyValidation] = useState("");
 
@@ -68,9 +69,13 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
   const onSubmit = async (data: BillboardFormValues) => {
     try {
       setLoading(true);
-      await axios.patch(`/api/stores/${params.storeId}`, data);
+      if (initialData) {
+        await axios.patch(`/api/${params.storeId}/billboards/${params.billboardId}`, data);
+      } else {
+        await axios.post(`/api/${params.storeId}/billboards`, data);
+      }
       router.refresh();
-      toast.success("Store saved successfully.");
+      toast.success(toastMessage);
     } catch (error) {
       toast.error("Something went wrong.");
     } finally {
@@ -84,12 +89,12 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
     setEmptyValidation(form.getValues("label"));
   };
 
-  const handleBlur = (data: BillboardFormValues) => {
+  const handleBlur = () => {
     if (!submitButtonClicked) {
       if (initialData) {
         form.setValue("label", initialData?.label);
       } else {
-        form.reset(data, { keepDirty: false, keepTouched: false });
+        form.resetField("label", { keepDirty: false });
       }
     }
   };
@@ -97,13 +102,13 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
   const onDelete = async () => {
     try {
       setLoading(true);
-      await axios.delete(`/api/stores/${params.storeId}`);
+      await axios.delete(`/api/${params.storeId}/billboards/${params.billboardId}`);
       router.refresh();
       router.push("/");
-      toast.success("Store deleted successfully.");
+      toast.success("Billboard deleted successfully.");
     } catch (error) {
       toast.error(
-        "Make sure you have removed all products and categories first."
+        "Make sure you have removed all categories using this billboard first."
       );
     } finally {
       setLoading(false);
@@ -111,11 +116,16 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
     }
   };
 
-  // const deleteImage = async () => {
-  //   try {
-  //     setLoading(true);
-  //     await axios.delete(`/api/delete-image`, );
-  // }
+  const deleteImage = async () => {
+    try {
+      setLoading(true);
+      await axios.post(`/api/delete-image`, {imageId: imageId});
+    } catch (error) {
+      toast.error("Error deleting image.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -152,15 +162,16 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Background Image</FormLabel>
-                <FormControl
-                  onChange={() => handleChange()}
-                  onBlur={() => handleBlur}
-                >
+                <FormControl>
                   <ImageUpload
                     value={field.value ? [field.value] : []}
                     disabled={loading}
                     onChange={(url) => field.onChange(url)}
-                    onRemove={(public_Id) => field.onChange("")}
+                    onRemove={() => {
+                      field.onChange("");
+                      deleteImage();
+                    }}
+                    imageId={(imageId) => setImageId(imageId)}
                   />
                 </FormControl>
                 <FormMessage />
@@ -176,7 +187,7 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
                   <FormLabel>Label</FormLabel>
                   <FormControl
                     onChange={() => handleChange()}
-                    onBlur={() => handleBlur}
+                    onBlur={() => handleBlur()}
                   >
                     <Input
                       disabled={loading}

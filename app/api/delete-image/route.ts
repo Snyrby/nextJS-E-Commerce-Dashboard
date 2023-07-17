@@ -12,15 +12,16 @@ export async function POST(req: Request) {
   if (!userId) {
     return new NextResponse("Unauthenticated", { status: 401 });
   }
-  const { id } = await req.json();
-  if (!id) {
+  const { imageId } = await req.json();
+  
+  if (!imageId) {
     return NextResponse.json(
       { message: "Image Id is required." },
       { status: 400 }
     );
   }
   try {
-    const result = await cloudinary.api.delete_resources(id, {
+    const result = await cloudinary.api.delete_resources(imageId, {
       type: "upload",
       resource_type: "image",
     });
