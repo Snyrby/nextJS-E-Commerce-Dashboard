@@ -59,6 +59,16 @@ export async function PATCH(
         status: 403,
       });
     }
+    const oldBillboard = await prismadb.billboard.findFirst({ 
+      where: { id: params.billboardId },
+    })
+    const oldImageId: any = oldBillboard?.imageId
+    if (imageId !== oldImageId) {
+      await cloudinary.api.delete_resources(oldImageId, {
+        type: "upload",
+        resource_type: "image",
+      });
+    }
     const billboard = await prismadb.billboard.updateMany({
       where: { id: params.billboardId },
       data: { label, imageUrl, imageId },
