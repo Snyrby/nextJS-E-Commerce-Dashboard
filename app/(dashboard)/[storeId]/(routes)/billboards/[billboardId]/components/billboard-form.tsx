@@ -43,7 +43,7 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [imageId, setImageId] = useState({});
+  const [imageId, setImageId] = useState("");
   const [submitButtonClicked, setSubmitButtonClicked] = useState(false);
   const [emptyValidation, setEmptyValidation] = useState("");
 
@@ -72,7 +72,8 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
           {label: data.label, imageUrl: data.imageUrl, imageId: imageId}
         );
       } else {
-        await axios.post(`/api/${params.storeId}/billboards`, {data, imageId: imageId});
+        console.log(imageId);
+        await axios.post(`/api/${params.storeId}/billboards`, {label: data.label, imageUrl: data.imageUrl, imageId: imageId});
       }
       router.refresh();
       router.push(`/${params.storeId}/billboards`);
@@ -218,7 +219,6 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
           </Button>
         </form>
       </Form>
-      <Separator />
     </>
   );
 };

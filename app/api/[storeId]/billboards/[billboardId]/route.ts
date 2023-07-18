@@ -1,6 +1,12 @@
 import prismadb from "@/lib/prismadb";
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
+import { v2 as cloudinary } from "cloudinary";
+cloudinary.config({
+  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
+  api_secret: process.env.NEXT_PUBLIC_CLOUDINARY_API_SECRET,
+});
 
 export async function GET(
   req: Request,
@@ -29,13 +35,16 @@ export async function PATCH(
     if (!userId) {
       return new NextResponse("Unauthenticated", { status: 401 });
     }
-    const { label, imageUrl } = await req.json();
+    const { label, imageUrl, imageId } = await req.json();
 
     if (!label) {
       return new NextResponse("A label is required", { status: 400 });
     }
     if (!imageUrl) {
       return new NextResponse("An Image Url is required", { status: 400 });
+    }
+    if (!imageId) {
+      return new NextResponse("An Image Id is required", { status: 400 });
     }
     if (!params.billboardId) {
       return new NextResponse("A billboard Id is required", { status: 400 });
@@ -52,7 +61,7 @@ export async function PATCH(
     }
     const billboard = await prismadb.billboard.updateMany({
       where: { id: params.billboardId },
-      data: { label, imageUrl },
+      data: { label, imageUrl, imageId },
     });
     return NextResponse.json(billboard, { status: 200 });
   } catch (error) {
@@ -82,10 +91,18 @@ export async function DELETE(
         status: 403,
       });
     }
-    const billboard = await prismadb.billboard.deleteMany({
+    const billboard = await prismadb.billboard.findFirst({
       where: { id: params.billboardId },
     });
-    return NextResponse.json(billboard, { status: 200 });
+    const imageId: any = billboard?.imageId
+    await cloudinary.api.delete_resources(imageId, {
+      type: "upload",
+      resource_type: "image",
+    });
+    const billboardDelete = await prismadb.billboard.deleteMany({
+      where: { id: params.billboardId },
+    })
+    return NextResponse.json(billboardDelete, { status: 200 });
   } catch (error) {
     console.log("[BILLBOARD_DELETE]", error);
     return new NextResponse("Internal error", { status: 500 });
