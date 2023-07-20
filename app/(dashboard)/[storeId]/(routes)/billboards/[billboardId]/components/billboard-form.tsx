@@ -27,7 +27,8 @@ import ImageUpload from "@/components/ui/image-upload";
 
 const formSchema = z.object({
   label: z.string().min(1),
-  imageUrl: z.string().min(1),
+  // imageUrl: z.string().min(1),
+  image: z.object({ imageUrl: z.string(), imageId: z.string() }),
 });
 
 type BillboardFormValues = z.infer<typeof formSchema>;
@@ -43,7 +44,7 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [imageId, setImageId] = useState("");
+  // const [imageId, setImageId] = useState("");
 
   const title = initialData ? "Edit Billboard" : "Create Billboard";
   const description = initialData ? "Edit a Billboard" : "Add a Billboard";
@@ -58,7 +59,7 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
 
   const form = useForm<BillboardFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData || { label: "", imageUrl: "" },
+    defaultValues: initialData || { label: "", image: {} },
   });
 
   const onSubmit = async (data: BillboardFormValues) => {
@@ -67,14 +68,10 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
       if (initialData) {
         await axios.patch(
           `/api/${params.storeId}/billboards/${params.billboardId}`,
-          { label: data.label, imageUrl: data.imageUrl, imageId: imageId }
+          data
         );
       } else {
-        await axios.post(`/api/${params.storeId}/billboards`, {
-          label: data.label,
-          imageUrl: data.imageUrl,
-          imageId: imageId,
-        });
+        await axios.post(`/api/${params.storeId}/billboards`, data);
       }
       router.refresh();
       router.push(`/${params.storeId}/billboards`);
@@ -105,10 +102,10 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
     }
   };
 
-  const deleteImage = async () => {
+  const deleteImage = async (imageId : any) => {
     try {
       setLoading(true);
-      await axios.post(`/api/delete-image`, { imageId: imageId });
+      await axios.post(`/api/delete-image`, { imageId });
     } catch (error) {
       toast.error("Error deleting image.");
     } finally {
@@ -147,18 +144,18 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
         >
           <FormField
             control={form.control}
-            name="imageUrl"
+            name="image"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Background Image</FormLabel>
                 <FormControl>
                   <ImageUpload
-                    value={field.value ? [field.value] : []}
+                    value={field.value ? [field.value.imageUrl] : []}
                     disabled={loading}
-                    onChange={(imageUrl, imageId) => field.onChange(imageUrl)}
+                    onChange={(imageUrl, imageId) => field.onChange({imageUrl, imageId})}
                     onRemove={() => {
-                      field.onChange("");
-                      deleteImage();
+                      field.onChange({imageUrl: "", imageId: ""});
+                      deleteImage(field.value.imageId);
                     }}
                     multiple={false}
                   />
