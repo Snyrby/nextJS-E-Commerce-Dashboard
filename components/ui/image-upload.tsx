@@ -19,7 +19,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   onChange,
   onRemove,
   value,
-  imageId,
 }) => {
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => {
@@ -59,7 +58,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           </div>
         ))}
       </div>
-      <CldUploadWidget onUpload={onUpload} uploadPreset="e-commerce-admin" options={{multiple:false}}>
+      <CldUploadWidget onUpload={onUpload} uploadPreset="e-commerce-admin">
         {({ open }) => {
           const onClick = () => {
             open();

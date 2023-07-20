@@ -23,7 +23,7 @@ export async function GET(
         category: true,
         size: true,
         color: true,
-      }
+      },
     });
     return NextResponse.json(product, { status: 200 });
   } catch (error) {
@@ -48,7 +48,6 @@ export async function PATCH(
       colorId,
       sizeId,
       images,
-      imageId,
       isFeatured,
       isArchived,
     } = await req.json();
@@ -88,7 +87,7 @@ export async function PATCH(
         status: 403,
       });
     }
-    // const oldBillboard = await prismadb.billboard.findFirst({ 
+    // const oldBillboard = await prismadb.billboard.findFirst({
     //   where: { id: params.billboardId },
     // })
     // const oldImageId: any = oldBillboard?.imageId
@@ -100,33 +99,35 @@ export async function PATCH(
     // }
     await prismadb.product.update({
       where: { id: params.productId },
-      data: { 
-        name, 
-        price, 
+      data: {
+        name,
+        price,
         categoryId,
         colorId,
         sizeId,
         images: {
-          deleteMany: {}
+          deleteMany: {},
         },
         isFeatured,
-        isArchived, 
+        isArchived,
       },
     });
     const product = await prismadb.product.update({
       where: {
-        id: params.productId
+        id: params.productId,
       },
       data: {
         images: {
           createMany: {
             data: [
-              ...images.map((image: { imageUrl: string }) => image)
-            ]
-          }
-        }
-      }
-    })
+              ...images.map(
+                (image: { imageUrl: string; imageId: string }) => image
+              ),
+            ],
+          },
+        },
+      },
+    });
     return NextResponse.json(product, { status: 200 });
   } catch (error) {
     console.log("[PRODUCT_PATCH]", error);
@@ -144,7 +145,7 @@ export async function DELETE(
       return new NextResponse("Unauthenticated", { status: 401 });
     }
     if (!params.productId) {
-      return new NextResponse("A Billboard Id is required", { status: 400 });
+      return new NextResponse("A product Id is required", { status: 400 });
     }
     const storeByUserId = await prismadb.store.findFirst({
       where: { id: params.storeId, userId },
@@ -155,17 +156,20 @@ export async function DELETE(
         status: 403,
       });
     }
-    // const billboard = await prismadb.billboard.findFirst({
-    //   where: { id: params.productId },
-    // });
-    // const imageId: any = billboard?.imageId
-    // await cloudinary.api.delete_resources(imageId, {
-    //   type: "upload",
-    //   resource_type: "image",
-    // });
+    const productImages = await prismadb.image.findMany({
+      where: { productId: params.productId },
+    });
+
+    productImages.forEach(async (image) => {
+      const imageId: any = image.imageId;
+      await cloudinary.api.delete_resources(imageId, {
+        type: "upload",
+        resource_type: "image",
+      });
+    });
     const product = await prismadb.product.deleteMany({
       where: { id: params.productId },
-    })
+    });
     return NextResponse.json(product, { status: 200 });
   } catch (error) {
     console.log("[PRODUCT_DELETE]", error);

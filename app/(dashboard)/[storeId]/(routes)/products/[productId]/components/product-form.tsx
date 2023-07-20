@@ -37,7 +37,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 const formSchema = z.object({
   name: z.string().min(1),
   images: z.object({ imageUrl: z.string(), imageId: z.string() }).array(),
-  // imageId: z.string().min(1).array(),
   price: z.coerce.number().min(1),
   categoryId: z.string().min(1),
   colorId: z.string().min(1),
@@ -193,14 +192,13 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                       field.onChange([...field.value, { imageUrl, imageId }])
                     }
                     onRemove={(imageUrl) => {
+                      field.value.forEach((current) => current.imageUrl === imageUrl ? deleteImage(current.imageId) : null)
                       field.onChange([
                         ...field.value.filter(
                           (current) => current.imageUrl !== imageUrl
                         ),
                       ]);
-                      // deleteImage(field.value.);
                     }}
-                    // imageId={(currentImageId) => form.setValue("imageId", [...form.getValues("imageId"), currentImageId])}
                   />
                 </FormControl>
                 <FormMessage />
