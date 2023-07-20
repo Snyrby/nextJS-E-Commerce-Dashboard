@@ -199,6 +199,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                         ),
                       ]);
                     }}
+                    multiple={true}
                   />
                 </FormControl>
                 <FormMessage />

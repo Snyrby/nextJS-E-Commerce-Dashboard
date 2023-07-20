@@ -12,6 +12,7 @@ interface ImageUploadProps {
   onChange: (imageUrl: string, imageId: string) => void;
   onRemove: (imageUrl: string) => void;
   value: string[];
+  multiple: boolean;
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({
@@ -19,6 +20,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   onChange,
   onRemove,
   value,
+  multiple,
 }) => {
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => {
@@ -58,7 +60,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           </div>
         ))}
       </div>
-      <CldUploadWidget onUpload={onUpload} uploadPreset="e-commerce-admin">
+      <CldUploadWidget onUpload={onUpload} uploadPreset="e-commerce-admin" options={{multiple: multiple}}>
         {({ open }) => {
           const onClick = () => {
             open();
