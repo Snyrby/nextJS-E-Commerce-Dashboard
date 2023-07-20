@@ -9,10 +9,9 @@ import { Button } from "@/components/ui/button";
 
 interface ImageUploadProps {
   disabled?: boolean;
-  onChange: (value: string) => void;
-  onRemove: (value: string) => void;
+  onChange: (imageUrl: string, imageId: string) => void;
+  onRemove: (imageUrl: string) => void;
   value: string[];
-  imageId: (value: string) => void;
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({
@@ -28,9 +27,9 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   }, []);
 
   const onUpload = (result: any) => {
-    onChange(result.info.secure_url);
-    imageId(result.info.public_id);
-    close();
+    onChange(result.info.secure_url, result.info.public_id);
+    // imageId(result.info.public_id);
+    // close();
   };
 
   if (!isMounted) {

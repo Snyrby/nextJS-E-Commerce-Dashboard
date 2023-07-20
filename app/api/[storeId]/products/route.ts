@@ -17,7 +17,6 @@ export async function POST(
       colorId,
       sizeId,
       images,
-      imageId,
       isFeatured,
       isArchived,
     } = await req.json();
@@ -74,10 +73,9 @@ export async function POST(
         storeId: params.storeId,
         images: {
           createMany: {
-            data: {
-              ...images((image: { imageUrl: string }) => image),
-              ...imageId
-            },
+            data: [
+              ...images.map((image: { imageUrl: string, imageId: string }) => image),
+            ],
           },
         },
       },

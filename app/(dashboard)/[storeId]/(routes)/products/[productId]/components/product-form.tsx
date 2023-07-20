@@ -36,8 +36,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
   name: z.string().min(1),
-  images: z.object({ imageUrl: z.string() }).array(),
-  imageId: z.string().min(1).array(),
+  images: z.object({ imageUrl: z.string(), imageId: z.string() }).array(),
+  // imageId: z.string().min(1).array(),
   price: z.coerce.number().min(1),
   categoryId: z.string().min(1),
   colorId: z.string().min(1),
@@ -65,7 +65,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  // const [imageId, setImageId] = useState("");
 
   const title = initialData ? "Edit Product" : "Create Product";
   const description = initialData ? "Edit a Product" : "Add a Product";
@@ -88,7 +87,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       : {
           name: "",
           images: [],
-          imageId: [],
           price: 0,
           categoryId: "",
           colorId: "",
@@ -101,6 +99,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const onSubmit = async (data: ProductFormValues) => {
     try {
       setLoading(true);
+      console.log(data);
       if (initialData) {
         await axios.patch(
           `/api/${params.storeId}/products/${params.productId}`,
@@ -138,11 +137,11 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     }
   };
 
-  const deleteImage = async () => {
+  const deleteImage = async (imageId : any) => {
     try {
       setLoading(true);
       await axios.post(`/api/delete-image`, {
-        imageId: form.getValues("imageId"),
+        imageId,
       });
     } catch (error) {
       toast.error("Error deleting image.");
@@ -190,8 +189,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                   <ImageUpload
                     value={field.value.map((image) => image.imageUrl)}
                     disabled={loading}
-                    onChange={(imageUrl) =>
-                      field.onChange([...field.value, { imageUrl }])
+                    onChange={(imageUrl, imageId) =>
+                      field.onChange([...field.value, { imageUrl, imageId }])
                     }
                     onRemove={(imageUrl) => {
                       field.onChange([
@@ -199,9 +198,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                           (current) => current.imageUrl !== imageUrl
                         ),
                       ]);
-                      deleteImage();
+                      // deleteImage(field.value.);
                     }}
-                    imageId={(currentImageId) => form.setValue("imageId", [...form.getValues("imageId"), currentImageId])}
+                    // imageId={(currentImageId) => form.setValue("imageId", [...form.getValues("imageId"), currentImageId])}
                   />
                 </FormControl>
                 <FormMessage />
