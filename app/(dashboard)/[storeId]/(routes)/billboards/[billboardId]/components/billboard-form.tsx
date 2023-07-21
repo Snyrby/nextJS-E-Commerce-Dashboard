@@ -27,8 +27,9 @@ import ImageUpload from "@/components/ui/image-upload";
 
 const formSchema = z.object({
   label: z.string().min(1),
-  // imageUrl: z.string().min(1),
-  image: z.object({ imageUrl: z.string(), imageId: z.string() }),
+  imageUrl: z.string().min(1),
+  imageId: z.string().min(1),
+  // image: z.object({ imageUrl: z.string(), imageId: z.string() }),
 });
 
 type BillboardFormValues = z.infer<typeof formSchema>;
@@ -59,7 +60,7 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
 
   const form = useForm<BillboardFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData || { label: "", image: {} },
+    defaultValues: initialData || { label: "", imageUrl: "", imageId: "" },
   });
 
   const onSubmit = async (data: BillboardFormValues) => {
@@ -102,7 +103,7 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
     }
   };
 
-  const deleteImage = async (imageId : any) => {
+  const deleteImage = async (imageId: any) => {
     try {
       setLoading(true);
       await axios.post(`/api/delete-image`, { imageId });
@@ -144,18 +145,21 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
         >
           <FormField
             control={form.control}
-            name="image"
+            name="imageUrl"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Background Image</FormLabel>
                 <FormControl>
                   <ImageUpload
-                    value={field.value ? [field.value.imageUrl] : []}
+                    value={field.value ? [field.value] : []}
                     disabled={loading}
-                    onChange={(imageUrl, imageId) => field.onChange({imageUrl, imageId})}
+                    onChange={(imageUrl, imageId) => {
+                      field.onChange(imageUrl);
+                      form.setValue("imageId", imageId);
+                    }}
                     onRemove={() => {
-                      field.onChange({imageUrl: "", imageId: ""});
-                      deleteImage(field.value.imageId);
+                      field.onChange("");
+                      deleteImage(form.getValues("imageId"));
                     }}
                     multiple={false}
                   />
