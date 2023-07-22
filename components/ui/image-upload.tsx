@@ -58,7 +58,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           </div>
         ))}
       </div>
-      {!value.length && (
+      {multiple || (value.length === 0 && !multiple) ? (
         <CldUploadWidget
           onUpload={onUpload}
           uploadPreset="e-commerce-admin"
@@ -81,7 +81,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
             );
           }}
         </CldUploadWidget>
-      )}
+      ) : null}
     </div>
   );
 };
