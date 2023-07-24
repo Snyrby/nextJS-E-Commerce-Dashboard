@@ -98,7 +98,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const onSubmit = async (data: ProductFormValues) => {
     try {
       setLoading(true);
-      console.log(data);
       if (initialData) {
         await axios.patch(
           `/api/${params.storeId}/products/${params.productId}`,
